@@ -3,7 +3,7 @@ import { prisma } from '../src/database';
 import app from '../src/app';
 
 beforeAll(() => {
-    prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY`;
+    prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY;`;
 });
 
 describe("POST /reccomendations", () => {
@@ -58,3 +58,12 @@ describe("POST /recommendations/:id", () => {
         expect(status).toEqual(200);
     });
 });
+
+describe("GET /recommendations", () => {
+    it("200: successfully get last 10 recommendations", async () => {
+        const result = await supertest(app).get("/recommendations");
+
+        expect(result.body).toEqual(expect.any(Array));
+        expect(result.body.length).toBeLessThanOrEqual(10);
+    });
+})
