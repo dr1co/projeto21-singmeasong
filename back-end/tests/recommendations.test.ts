@@ -63,7 +63,24 @@ describe("GET /recommendations", () => {
     it("200: successfully get last 10 recommendations", async () => {
         const result = await supertest(app).get("/recommendations");
 
+        expect(result.status).toEqual(200);
         expect(result.body).toEqual(expect.any(Array));
         expect(result.body.length).toBeLessThanOrEqual(10);
     });
-})
+});
+
+describe("GET /recommendations/:id", () => {
+    it("200: successfully get specific recommendation via ID", async () => {
+        const id = 1 // Snow Halation - Love Live! OST [Piano]
+
+        const result = await supertest(app).get(`/recommendations/${id}`);
+
+        expect(result.status).toEqual(200);
+        expect(result.body).toEqual(expect.objectContaining({
+            id: expect.any(Number),
+            name: expect.any(String),
+            youtubeLink: expect.any(String),
+            score: expect.any(Number)
+        }));
+    });
+});
