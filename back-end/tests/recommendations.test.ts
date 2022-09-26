@@ -1,21 +1,32 @@
 import supertest from 'supertest';
 import { prisma } from '../src/database';
 import app from '../src/app';
+import recommendationList from './factory/recommendationFactory';
 
 beforeAll(async () => {
-    await prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY;`;
+    for (let i = 0 ; i < recommendationList.length ; i++) {
+        await prisma.$executeRaw`INSERT INTO "recommendations" ("name", "youtubeLink")
+        VALUES (${recommendationList[i].name}, ${recommendationList[i].youtubeLink});`;
+    };
 });
 
 describe("POST /reccomendations", () => {
     it("201: Fields properly filled", async () => {
         const newRecommendation = { 
             name: "Snow halation - Love Live! OST [Piano]",
-            youtubeLink: "https://www.youtube.com/watch?v=Z4KmL4KI0cQ"
+            youtubeLink: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         };
 
         const { status } = await supertest(app).post("/recommendations").send(newRecommendation);
 
         expect(status).toEqual(201);
+    });
+
+    it("409: Recommendation name conflicts with other already in the database", async () => {
+        const newRecommendation = {
+            name: "Snow halation - Love Live! OST [Piano]",
+            youtubeLink: "https"
+        }
     });
 
     it("422: Recommendation name is empty", async () => {
@@ -31,8 +42,8 @@ describe("POST /reccomendations", () => {
 
     it("422: YoutubeLink is not an actual youtube link", async () => {
         const newRecommendation = {
-            name: "Departures - Guilty Crown ED1 [Piano]",
-            youtubeLink: "www.google.com" // https://www.youtube.com/watch?v=5hft807EJ6o
+            name: "This game (2021 ver.) - No Game No Life [Piano] / Konomi Suzuki",
+            youtubeLink: "www.google.com" // https://www.youtube.com/watch?v=j137kcnJs8U
         };
 
         const { status } = await supertest(app).post("/recommendations").send(newRecommendation);
@@ -43,7 +54,7 @@ describe("POST /reccomendations", () => {
 
 describe("POST /recommendations/:id", () => {
     it("200: successful /upvote", async () => {
-        const id = 1 // Snow Halation - Love Live! OST [Piano]
+        const id = 1 // Departures - Guilty Crown ED1 [Piano]
 
         const { status } = await supertest(app).post(`/recommendations/${id}/upvote`);
 
@@ -51,7 +62,7 @@ describe("POST /recommendations/:id", () => {
     });
 
     it("200: successful /downvote", async () => {
-        const id = 1 // Snow Halation - Love Live! OST [Piano]
+        const id = 2 // Sincerely - Violet Evergarden OP [Piano]
 
         const { status } = await supertest(app).post(`/recommendations/${id}/downvote`);
 
@@ -79,7 +90,7 @@ describe("GET /recommendations", () => {
 
 describe("GET /recommendations/:id", () => {
     it("200: successfully get specific recommendation via ID", async () => {
-        const id = 1 // Snow Halation - Love Live! OST [Piano]
+        const id = 3 // Hikaru Nara - Shigatsu wa Kimi no Uso OP [Piano]
 
         const result = await supertest(app).get(`/recommendations/${id}`);
 
@@ -95,10 +106,22 @@ describe("GET /recommendations/:id", () => {
     it("404: ID does not match any recommendation", async () => {
         const id = 0;
 
-        const result = await supertest(app).get(`/recommendations/${id}`);
+        const { status } = await supertest(app).get(`/recommendations/${id}`);
 
-        expect(result.status).toEqual(404);
+        expect(status).toEqual(404);
     })
+});
+
+describe("GET /recommendations/top/:amount", () => {
+    it("200: successfully get list of top recommendations based on amount", async () => {
+        const amount = 5;
+
+        const result = await supertest(app).get(`/recommendations/top/${amount}`);
+
+        expect(result.status).toEqual(200);
+        expect(result.body).toEqual(expect.any(Array));
+        expect(result.body.length).toBeLessThanOrEqual(amount);
+    });
 });
 
 describe("GET /recommendations/random", () => {
