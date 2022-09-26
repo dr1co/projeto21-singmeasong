@@ -11,4 +11,10 @@ export default {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
+  coveragePathIgnorePatterns: [ 
+    "./src/repositories",
+    "./src/database.ts",
+    "./src/utils",
+    "tests/factory"
+  ]
 };

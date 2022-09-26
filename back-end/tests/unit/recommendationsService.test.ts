@@ -157,3 +157,17 @@ describe("Test getRandom function", () => {
         expect(result).rejects.toEqual(errorUtils.notFoundError());
     });
 });
+
+describe("Test getTop function", () => {
+    const amount = 7;
+
+    it("Success on getting top results", async () => {
+        jest.spyOn(recommendationRepository, "getAmountByScore").mockImplementationOnce((): any => {
+            return [1, 2, 3];
+        });
+
+        await recommendationService.getTop(amount);
+
+        expect(recommendationRepository.getAmountByScore).toBeCalledTimes(1);
+    })
+})
