@@ -2,6 +2,7 @@ import supertest from 'supertest';
 import { prisma } from '../src/database';
 import app from '../src/app';
 import { recommendationList } from './factory/recommendationFactory';
+import * as testServices from '../src/services/testServices';
 
 beforeAll(async () => {
     for (let i = 0 ; i < recommendationList.length ; i++) {
@@ -10,9 +11,9 @@ beforeAll(async () => {
     };
 });
 
-/* afterAll( async () => {
-    prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY;`;
-}); */
+afterAll( async () => {
+    await testServices.resetRecommendations();
+});
 
 describe("POST /reccomendations", () => {
     it("201: Fields properly filled", async () => {
@@ -142,7 +143,7 @@ describe("GET /recommendations/random", () => {
     });
 
     it("404: returns nothing if there's no recommendations in the database", async () => {
-        await prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY`;
+        await testServices.resetRecommendations();
 
         const result = await supertest(app).get(`/recommendations/random`);
 
