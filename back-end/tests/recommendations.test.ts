@@ -39,4 +39,22 @@ describe("POST /reccomendations", () => {
 
         expect(status).toEqual(422);
     });
-})
+});
+
+describe("POST /recommendations/:id", () => {
+    it("200: successful /upvote", async () => {
+        const id = 1 // Snow Halation - Love Live! OST [Piano]
+
+        const { status } = await supertest(app).post(`/recommendations/${id}/upvote`);
+
+        expect(status).toEqual(200);
+    });
+
+    it("200: successful /downvote", async () => {
+        const id = 1 // Snow Halation - Love Live! OST [Piano]
+
+        const { status } = await supertest(app).post(`/recommendations/${id}/downvote`);
+
+        expect(status).toEqual(200);
+    });
+});
