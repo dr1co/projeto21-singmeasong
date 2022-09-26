@@ -121,3 +121,39 @@ describe("Test get function", () => {
         expect(recommendationRepository.findAll).toBeCalledTimes(1);
     });
 });
+
+describe("Test getRandom function", () => {
+    it("Success on getting random song w/ 10+ upvotes", async () => {
+        jest.spyOn(Math, "random").mockImplementationOnce(() => {
+            return 0.5;
+        });
+        jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => {
+            return [1, 2, 3];
+        });
+
+        await recommendationService.getRandom();
+
+        expect(recommendationRepository.findAll).toBeCalledTimes(2); // 2 por conta de já ter sido chamada no describe anterior, pela função get()
+    });
+
+    it("Success on getting random song w/ 10 upvotes or less", async () => {
+        jest.spyOn(Math, "random").mockImplementationOnce(() => {
+            return 0.8;
+        });
+        jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => {
+            return [1, 2, 3];
+        });
+
+        await recommendationService.getRandom();
+
+        expect(recommendationRepository.findAll).toBeCalledTimes(3); // 3 pelo mesmo motivo
+    });
+
+    it("Fails since there are no recommendations in the database", async () => {
+        jest.spyOn(recommendationRepository, "findAll").mockResolvedValue([]);
+
+        const result = recommendationService.getRandom();
+
+        expect(result).rejects.toEqual(errorUtils.notFoundError());
+    });
+});
