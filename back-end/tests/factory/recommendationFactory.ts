@@ -1,4 +1,4 @@
-const recommendationList = [
+export const recommendationList = [
     {
         name: "Departures - Guilty Crown ED1 [Piano]",
         youtubeLink: "https://www.youtube.com/watch?v=5hft807EJ6o"
@@ -19,6 +19,4 @@ const recommendationList = [
         name: "Merry-Go-Round of Life - Howl's Moving Castle [Piano] / Joe Hisaishi",
         youtubeLink: "https://www.youtube.com/watch?v=lB4PRX737-0"
     }
-]
-
-export default recommendationList
+];

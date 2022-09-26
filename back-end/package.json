@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npx dotenv-cli -e .env.test jest -i",
+    "test:unit": "dotenv -e .env.test jest -- -i --coverage --testPathPattern=tests/unit",
     "dev": "nodemon src/server.ts"
   },
   "keywords": [],

@@ -1,7 +1,7 @@
 import supertest from 'supertest';
 import { prisma } from '../src/database';
 import app from '../src/app';
-import recommendationList from './factory/recommendationFactory';
+import { recommendationList } from './factory/recommendationFactory';
 
 beforeAll(async () => {
     for (let i = 0 ; i < recommendationList.length ; i++) {
@@ -9,6 +9,10 @@ beforeAll(async () => {
         VALUES (${recommendationList[i].name}, ${recommendationList[i].youtubeLink});`;
     };
 });
+
+/* afterAll( async () => {
+    prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY;`;
+}); */
 
 describe("POST /reccomendations", () => {
     it("201: Fields properly filled", async () => {
