@@ -109,3 +109,15 @@ describe("Test upvote/downvote functions", () => {
         expect(result).rejects.toEqual(errorUtils.notFoundError("Recommendation not found"));
     });
 });
+
+describe("Test get function", () => {
+    it("Success on getting recommendations", async () => {
+        jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => {
+            return [1, 2, 3];
+        });
+
+        await recommendationService.get();
+
+        expect(recommendationRepository.findAll).toBeCalledTimes(1);
+    });
+});
