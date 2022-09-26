@@ -2,8 +2,8 @@ import supertest from 'supertest';
 import { prisma } from '../src/database';
 import app from '../src/app';
 
-beforeAll(() => {
-    prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY;`;
+beforeAll(async () => {
+    await prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY;`;
 });
 
 describe("POST /reccomendations", () => {
@@ -57,6 +57,14 @@ describe("POST /recommendations/:id", () => {
 
         expect(status).toEqual(200);
     });
+
+    it("404: ID does not match any recommendation", async () => {
+        const id = 0;
+
+        const { status } = await supertest(app).post(`/recommendations/${id}/upvote`);
+
+        expect(status).toEqual(404);
+    })
 });
 
 describe("GET /recommendations", () => {
@@ -82,5 +90,35 @@ describe("GET /recommendations/:id", () => {
             youtubeLink: expect.any(String),
             score: expect.any(Number)
         }));
+    });
+
+    it("404: ID does not match any recommendation", async () => {
+        const id = 0;
+
+        const result = await supertest(app).get(`/recommendations/${id}`);
+
+        expect(result.status).toEqual(404);
+    })
+});
+
+describe("GET /recommendations/random", () => {
+    it("200: successfully get random recommendation", async () => {
+        const result = await supertest(app).get(`/recommendations/random`);
+
+        expect(result.status).toEqual(200);
+        expect(result.body).toEqual(expect.objectContaining({
+            id: expect.any(Number),
+            name: expect.any(String),
+            youtubeLink: expect.any(String),
+            score: expect.any(Number)
+        }));
+    });
+
+    it("404: returns nothing if there's no recommendations in the database", async () => {
+        await prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY`;
+
+        const result = await supertest(app).get(`/recommendations/random`);
+
+        expect(result.status).toEqual(404);
     });
 });
